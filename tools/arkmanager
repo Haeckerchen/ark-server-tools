@@ -5,12 +5,13 @@
 # Original author:      LeXaT
 # Maintainer:           FezVrasta
 # Contributors:         Sispheor, Atriusftw, klightspeed, lexat, puseidr
+# German Translation:   Haeckerchen
 
 # Script version
 arkstVersion='1.6'
 arkstTag=''
 arkstCommit=''
-arkstGithubRepo="FezVrasta/ark-server-tools"
+arkstGithubRepo="Haeckerchen/ark-server-tools"
 arkstRootUseEnv=''
 arkstGlobalCfgFile='/etc/arkmanager/arkmanager.cfg'
 arkstUserCfgFile='.arkmanager.cfg'
@@ -32,7 +33,7 @@ doUpgradeTools() {
     reinstall_args=( "${reinstall_args[@]}" "--datadir" "$install_datadir" )
   fi
 
-  echo "arkmanager v${arkstVersion}: Checking for updates..."
+  echo "arkmanager v${arkstVersion}: Überprüfe auf Updates..."
 
   if [ -n "$arkstUnstable" ] || [ "$arkstChannel" != "master" ]; then
     doUpgradeToolsFromBranch
@@ -49,27 +50,27 @@ doUpgradeToolsFromCommit(){
 
   local commit="$1"
   tmpdir="$(mktemp -d "ark-server-tools-XXXXXXXX")"
-  if [ -z "$tmpdir" ]; then echo "Unable to create temporary directory"; exit 1; fi
+  if [ -z "$tmpdir" ]; then echo "Konnte kein temporäres Verzeichniss erstellen"; exit 1; fi
   cd "$tmpdir"
-  echo "Downloading installer"
+  echo "Downloade Installer..."
   curl -s -L "https://github.com/${arkstGithubRepo}/archive/${commit}.tar.gz" | tar -xz
   cd "ark-server-tools-${commit}/tools"
-  if [ ! -f "install.sh" ]; then echo "install.sh not found in $PWD"; exit 1; fi
+  if [ ! -f "install.sh" ]; then echo "install.sh wurde nicht gefunden in $PWD"; exit 1; fi
   sed -i -e "s|^arkstCommit='.*'|arkstCommit='${commit}'|" \
          -e "s|^arkstTag='.*'|arkstTag='${tagname}'|" \
          -e "s|^arkstRootUseEnv='.*'|arkstRootUseEnv='${arkstRootUseEnv}'|" \
          arkmanager
-  echo "Running install.sh"
+  echo "Führe install.sh as"
   $sudo bash install.sh "$steamcmd_user" "${reinstall_args[@]}"
   result=$?
   cd /
   rm -rf "$tmpdir"
 
   if [ "$result" = 0 ] || [ "$result" = 2 ]; then
-    echo "ARK Server Tools successfully upgraded"
+    echo "ARK Server Tools erfolgreich aktualisiert"
     "$0" --version
   else
-    echo "ARK Server Tools upgrade failed"
+    echo "ARK Server Tools Aktualisierung fehlgeschlagen"
   fi
   exit $result
 }
@@ -79,9 +80,9 @@ doUpgradeToolsFromBranch(){
   arkstLatestCommit=`curl -s "https://api.github.com/repos/${arkstGithubRepo}/git/refs/heads/${arkstChannel}" | sed -n 's/^ *"sha": "\(.*\)",.*/\1/p'`
 
   if [[ "$arkstLatestVersion" == "404: Not Found" ]]; then
-    echo "Channel '${arkstChannel}' does not exist"
+    echo "Branch '${arkstChannel}' existiert nicht"
     echo
-    echo "Available channels:"
+    echo "Verfügbare Branches:"
     curl -s "https://api.github.com/repos/${arkstGithubRepo}/git/refs/heads" | sed -n 's|^ *"ref": "refs/heads/\(.*\)",|\1|p'
     echo
     return
@@ -90,13 +91,13 @@ doUpgradeToolsFromBranch(){
   REPLY=
 
   if [[ $arkstLatestVersion > $arkstVersion ]]; then
-    read -p "A new version was found! Do you want to upgrade ARK Server Tools to v${arkstLatestVersion}?" -n 1 -r
+    read -p "Eine neue Version wurde gefunden! Möchtest Du ARK Server Tools aktualisieren auf v${arkstLatestVersion}?" -n 1 -r
     echo
   elif [[ $arkstLatestVersion == $arkstVersion && "$arkstLatestCommit" != "$arkstCommit" ]]; then
-    read -p "A hotfix is available for v${arkstLatestVersion}.  Do you wish to install it?" -n 1 -r
+    read -p "Ein Hotfix ist für v${arkstLatestVersion} verfügbar.  Möchtest Du ihn installieren?" -n 1 -r
     echo
   else
-    echo "Your ARK server tools are already up to date"
+    echo "Deine ARK Server Tools sind bereits auf dem neusten Stand"
   fi
 
   if [[ "$REPLY" =~ ^[Yy]$ ]]; then
@@ -108,7 +109,7 @@ doUpgradeToolsFromRelease(){
   local tagname=
   local desc=
 
-  echo "Getting latest release..."
+  echo "Lade neuste Version..."
   # Read the variables from github
   while IFS=$'\t' read -r n v; do
     case "${n}" in
@@ -119,20 +120,20 @@ doUpgradeToolsFromRelease(){
 
   if [ -n "$tagname" ]; then
     if [ "$tagname" != "$arkstTag" ]; then
-      echo "A new version has been released: ${tagname}"
+      echo "Eine neue Version wurde veröffentlicht: ${tagname}"
       echo -e "$desc"
-      read -p "Do you want to upgrade to ${tagname}? [Y/N] " -n 1 -r
+      read -p "Möchtest Du auf ${tagname} aktualisieren? [J/N] " -n 1 -r
       echo
-      if [[ "$REPLY" =~ ^[Yy]$ ]]; then
-        echo "Getting commit for latest release..."
+      if [[ "$REPLY" =~ ^[Jj]$ ]]; then
+        echo "Lade Commit für neuste Version..."
         local commit="$(curl -s "https://api.github.com/repos/${arkstGithubRepo}/git/refs/tags/${tagname}" | sed -n 's/^ *"sha": "\(.*\)",.*/\1/p')"
         doUpgradeToolsFromCommit "$commit"
       fi
     else
-      echo "Your ARK server tools are already up to date"
+      echo "Deine ARK Server Tools sind bereits auf dem neusten Stand."
     fi
   else
-    echo "Unable to get latest release"
+    echo "Konnte aktuellste Version nicht laden"
   fi
 }
 
@@ -142,9 +143,9 @@ doUninstallTools() {
     sudo=
   fi
 
-  read -p "Are you sure you want to uninstall the ARK Server Tools? [y/N]" -n 1 -r
+  read -p "Möchtest Du ARK Server Tools wirklich deinstallieren? [J/N]" -n 1 -r
 
-  if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+  if [[ "$REPLY" =~ ^[Jj]$ ]]; then
     if [ -n "${install_datadir}" -a -x "${install_datadir}/arkmanager-uninstall.sh" ]; then
       $sudo "${install_datadir}/arkmanager-uninstall.sh"
       exit 0
@@ -181,7 +182,7 @@ runAsRoot(){
   steamcmd_user_shellexec="$(getConfigVar steamcmd_user_shellexec "${BASH:-/bin/bash}")"
 
   if ! getent passwd "$steamcmd_user" >/dev/null 2>&1; then
-    echo "Invalid steamcmd_user in config file"
+    echo "Falscher steamcmd_user in Konfigurationsdatei."
     exit 1
   fi
 
@@ -276,16 +277,16 @@ checkConfig() {
   # SteamCMD configuration
   # steamcmdroot
   if [ ! -d "$steamcmdroot" ] ; then
-    echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tYour SteamCMD root seems not valid."
+    echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tDein SteamCMD Pfad ist ungültig."
   fi
   # steamcmdexec
   if [ ! -f "$steamcmdroot/$steamcmdexec" ] ; then
-    echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tYour SteamCMD exec could not be found."
+    echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tDein SteamCMD konnte nicht gefunden werden."
   fi
   # steamcmd_user
   if [ "$steamcmd_user" != "--me" ]; then
     if ! getent passwd $steamcmd_user > /dev/null 2>&1 ; then
-      echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tYour SteamCMD user is not valid."
+      echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tDein SteamCMD-Benutzer ist ungültig."
     fi
   fi
 
@@ -293,7 +294,7 @@ checkConfig() {
   if [ "$1" != "install" ]; then
     # arkserverexec
     if [ -n "$arkserverroot" ] && [ ! -f "$arkserverroot/$arkserverexec" ] ; then
-      echo -e "[" "$YELLOW" "WARN" "$NORMAL" "]" "\tYour ARK server exec could not be found."
+      echo -e "[" "$YELLOW" "WARN" "$NORMAL" "]" "\tDein ARK Server Launcher konnte nicht gefunden werden."
     fi
 
     # SavedArks directory
@@ -301,7 +302,7 @@ checkConfig() {
       local savedarksdir="${arkserverroot}/${arkserverdir}/Saved/${ark_AltSaveDirectoryName:-SavedArks}"
       mkdir -p "${savedarksdir}"
       if [ ! -w "${savedarksdir}" ]; then
-        echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tThe ARK SavedArks directory is not writable, and saveworld will fail"
+        echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tDer ARKSavedArks Ordner ist nicht schreibar, und saveworld wird fehlschlagen."
       fi
     fi
 
@@ -310,7 +311,7 @@ checkConfig() {
       if [ -n "$arkserverroot" -a -d "${arkserverroot}/${arkserverdir}/Content/Mods" ]; then
         for modid in $(getModIds); do
           if [ ! -f "${arkserverroot}/${arkserverdir}/Content/Mods/${modid}/mod.info" ]; then
-            echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tMod ${modid} is requested but not installed.  Run 'arkmanager installmod ${modid}' to install this mod."
+            echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tMod ${modid} wurde angefordert, ist aber nicht installiert.  Führe 'arkmanager installmod ${modid}' aus um diese Mod zu installieren."
           fi
         done
       fi
@@ -319,13 +320,13 @@ checkConfig() {
 
   # Warn if mod_branch=Linux
   if [ "$mod_branch" == "Linux" -a -z "$nowarnmodbranch" ]; then
-    echo -e "[" "$YELLOW" "WARN" "$NORMAL" "]" "\tmod_branch is set to Linux. Linux mods are known to cause the server to crash. It is suggested you set mod_branch to Windows."
+    echo -e "[" "$YELLOW" "WARN" "$NORMAL" "]" "\tmod_branch ist auf Linux gesetzt. Linux Mods sind dafür bekannt den Server zum Absturz zu bringen. Es ist empfohlen den mod_branch auf Windows umzustellen."
   fi
 
   # Service configuration
   # logdir
   if [ ! -w "$logdir" ] ; then
-    echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tYou have not rights to write in the log directory."
+    echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tDu hast keine Berechtigung im Log Ordner zu schreiben."
   fi
 }
 
@@ -421,17 +422,17 @@ getSteamWorkshopDir(){
 rconcmd() {
   local adminpass="$(getAdminPassword)"
   if [ -z "$adminpass" ]; then
-    echo "ServerAdminPassword is empty - unable to execute RCON command"
+    echo "ServerAdminPassword ist leer - kann RCON Befehl nicht ausführen"
     return 1
   elif [[ "$adminpass" =~ [?\177-\377] ]]; then
-    echo "ServerAdminPassword contains invalid characters"
+    echo "ServerAdminPassword enthält nicht erlaubte Zeichen."
     return 1
   fi
   perl -MSocket -e '
     sub sendpkt {
       my ($sock, $reqid, $reqtype, $body) = @_;
       my $packet = pack("VVV", length($body) + 10, $reqid, $reqtype) . $body . "\0\0";
-      send($sock, $packet, 0) or die "Error sending command to server: $!";
+      send($sock, $packet, 0) or die "Fehler beim Senden des Befehls zum Server: $!";
     }
 
     sub recvpkt {
@@ -459,12 +460,12 @@ rconcmd() {
     socket(my $socket, PF_INET, SOCK_STREAM, 0);
     setsockopt($socket, SOL_SOCKET, SO_RCVTIMEO, pack("i4", 30, 0, 0, 0));
     my $sockaddr = pack_sockaddr_in($port, inet_aton($ipaddr));
-    connect($socket, $sockaddr) or die "Error connecting to server: $!";
+    connect($socket, $sockaddr) or die "Fehler bei der Verbindung zum Server: $!";
     auth($socket, $password);
     sendpkt($socket, 2, 2, $command);
     my ($resid, $restype, $rcvbody) = recvpkt($socket);
-    if ($rcvbody eq "Server received, But no response!! \n ") {
-      print "Command processed\n";
+    if ($rcvbody eq "Server hat empfangen, aber nicht geantwortet!! \n ") {
+      print "Befehl verarbeitet\n";
     } else {
       print "\"", $rcvbody, "\"\n";
     }
@@ -524,7 +525,7 @@ function notifyOverride(){
 function notify(){
   if [[ -n "$1" && "$1" != "-" ]]; then
     local msg
-    msg="${notifyTemplate:-Message from instance \`{instance\}\` on server \`{server\}\`: {msg\}}"
+    msg="${notifyTemplate:-Nachricht von Instanz \`{instance\}\` auf Server \`{server\}\`: {msg\}}"
     msg="${msg//\{msg\}/${1}}"
     msg="${msg//\{instance\}/${instance}}"
     msg="${msg//\{server\}/${HOSTNAME}}"
@@ -553,7 +554,7 @@ function runSteamCMD(){
 
 function runSteamCMDspinner(){
   if [ -n "$verbose" ]; then
-    printf "Executing"
+    printf "Ausführen"
     printf " %q" "$steamcmdroot/$steamcmdexec" +@NoPromptForPassword 1 ${steamcmd_cmds_prelogin} +login ${steamlogin:-anonymous} ${steamcmd_cmds_postlogin} "$@" +quit
     printf "\n"
     if (command >&3) 2>/dev/null; then
@@ -604,20 +605,20 @@ function runSteamCMDspinnerSubst(){
 #
 function checkForUpdate(){
   tput sc
-  echo "Querying Steam database for latest version..."
+  echo "Suche in Steam Datenbank nach neuster Version..."
 
   if isUpdateNeeded; then
     tput rc; tput ed;
-    echo -e "Current version:" "$RED" $instver "$NORMAL"
-    echo -e "Available version:" "$GREEN" $bnumber "$NORMAL"
-    echo -e "Your server needs to be restarted in order to receive the latest update."
-    echo -e "Run \"arkmanager update\" to do so"
+    echo -e "Aktuelle Version:" "$RED" $instver "$NORMAL"
+    echo -e "Verfügbare Version:" "$GREEN" $bnumber "$NORMAL"
+    echo -e "Dein Server muss neugestartet werden um dass neuste Update zu erhalten."
+    echo -e "Führe \"arkmanager update\" aus um das zu tun"
     return 1
   else
     tput rc; tput ed;
-    echo -e "Current version:" "$GREEN" $instver "$NORMAL"
-    echo -e "Available version:" "$GREEN" $bnumber "$NORMAL"
-    echo "Your server is up to date!"
+    echo -e "Aktuelle Version:" "$GREEN" $instver "$NORMAL"
+    echo -e "Verfügbare Version:" "$GREEN" $bnumber "$NORMAL"
+    echo "Dein Server ist auf dem aktuellsten Stand!"
     return 0
   fi
 }
@@ -632,7 +633,7 @@ function isUpdateNeeded(){
   if [[ -z "$bnumber" || "$bnumber" -eq "$instver" ]]; then
     return 1   # no update needed
   elif checkUpdateManifests; then
-    echo "Build ID changed but manifests have not changed"
+    echo "Build ID wurde geändert aber Manifeste wurden nicht geändert"
     return 1
   else
     return 0   # update needed
@@ -756,10 +757,10 @@ function getSavedArksDirectory(){
     cisavedir="$(find "${arkserverroot}" -ipath "${savedir}" | head -n1)"
 
     if [ -n "$cisavedir" ]; then
-      echo -e "  ${NORMAL}[  ${YELLOW}WARN${NORMAL}  ] Saved arks directory capitalization is inconsistent" >&2
+      echo -e "  ${NORMAL}[  ${YELLOW}WARN${NORMAL}  ] Die Großschreibung des Saved Arks Ordners ist inkonsistent." >&2
       savedir="${cisavedir}"
     else
-      echo -e "  ${NORMAL}[ ${RED}ERROR${NORMAL}  ] Saved arks directory does not exist" >&2
+      echo -e "  ${NORMAL}[ ${RED}ERROR${NORMAL}  ] Saved Arks Ordner existiert nicht" >&2
       echo ""
       return 1
     fi
@@ -952,8 +953,8 @@ doRun() {
   cd "${arkserverroot}/${arkserverexec%/*}"
 
   if isTheServerRunning; then
-    echo "Error: another server instance is running from the same directory"
-    echo "Aborting - two servers MUST NOT run from the same directory"
+    echo "Fehler: eine andere Server Instanz läuft bereits aus dem Verzeichniss"
+    echo "Abbruch - zwei Server DÜRFEN NICHT im GLEICHEN Verzeichniss ausgeführt werden"
     exit 1
   fi
   
@@ -963,7 +964,7 @@ doRun() {
   if [ -f "${arkserverroot}/${arkupdatelockfile}" ]; then
     local updatepid="$(<"${arkserverroot}/${arkupdatelockfile}")"
     if kill -0 "$updatepid" >/dev/null 2>&1; then
-      echo "An update is currently in progress.  Start aborted"
+      echo "Ein Update läuft gerade.  Start abgebrochen"
       return 1
     fi
   fi
@@ -1157,9 +1158,9 @@ doRun() {
 
           if (( serverdowntries > 12 )); then
             # Server has not been listening for 60 seconds, so restart it.
-            echo "`timestamp`: The server has stopped listening"
+            echo "`timestamp`: Der Server hat aufgehört zuzuhören..."
             echo "`timestamp`: Restarting server"
-            notify "${notifyMsgStoppedListening:-Server has stopped listening - restarting}"
+            notify "${notifyMsgStoppedListening:-Server antwortet nicht mehr - Neustart}"
             for (( i = 0; i < 5; i++ )); do
               if ! kill -0 "$serverpid"; then
                 break
@@ -1198,7 +1199,7 @@ doRun() {
     fi
 
     if [ "$restartserver" -ne 0 ]; then
-      notify "${notifyMsgServerTerminated:-Server exited - restarting}"
+      notify "${notifyMsgServerTerminated:-Server beendet - Neustart}"
       echo "`timestamp`: restarting server"
     fi
   done
@@ -1221,18 +1222,18 @@ doStart() {
   if [ -f "${arkserverroot}/${arkupdatelockfile}" ]; then
     local updatepid="$(<"${arkserverroot}/${arkupdatelockfile}")"
     if kill -0 "$updatepid" >/dev/null 2>&1; then
-      logprint "Start aborted due to running update - pid: $updatepid"
+      logprint "Start durch laufendes Update abgebrochen - pid: $updatepid"
       return 1
     fi
   fi
 
   serverpid="$(getServerPID)"
   if [ -n "$serverpid" ] && kill -0 "$serverpid"; then
-    logprint "Start aborted due to server already running - pid: $serverpid"
+    logprint "Start durch laufendes Update abgebrochen - pid: $serverpid"
   else
     if [ "$arkAutoUpdateOnStart" == "true" ]; then
       if ! [[ " $* " =~ " --noautoupdate " ]]; then
-        logprint "Checking for updates before starting"
+        logprint "Überprüfe vor dem Start auf Updates..."
         doUpdate --update-mods --no-autostart
       fi
     fi
@@ -1247,7 +1248,7 @@ doStart() {
     fi
     
     tput sc
-    logprint "The server is starting..."
+    logprint "Der Server startet..."
 
     local pid=$!
     if [[ -n "$nobackground" ]]; then
@@ -1276,7 +1277,7 @@ doStart() {
       doRunBG </dev/null >>"$logdir/$arkserverLog" 2>&1 & # output of this command is logged
     fi
     tput rc; tput ed;
-    logprint "The server is now running, and should be up within 10 minutes"
+    logprint "Der Server läuft jetzt und sollte in spätestens 10 Minuten online sein."
   fi
 }
 
@@ -1327,7 +1328,7 @@ doStop() {
       doSaveWorld
     fi
     tput sc
-    logprint "Stopping server; reason: $stopreason"
+    logprint "Stoppe Server; Grund: $stopreason"
     rm -f "$arkserverroot/$arkautorestartfile"
     rm -f "$arkserverroot/$arkoldautorestartfile"
     # kill the server with the PID
@@ -1343,7 +1344,7 @@ doStop() {
 
     if isTheServerRunning; then
       tput rc
-      logprint "Killing server"
+      logprint "Beende Server..."
       kill -KILL $PID >/dev/null 2>&1
     fi
 
@@ -1359,9 +1360,9 @@ doStop() {
     rm -f "${arkserverroot}/${arkmanagerpidfile}"
 
     tput rc; tput ed;
-    logprint "The server has been stopped"
+    logprint "Der Server wurde gestoppt"
   else
-    echo "The server is already stopped"
+    echo "Der Server ist bereits gestoppt"
   fi
 }
 
