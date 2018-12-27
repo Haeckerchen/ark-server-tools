@@ -1,17 +1,17 @@
-= ARK: Survival Evolved Linux Server Tools
+= ARK: Survival Evolved Linux Server Tools (German Version)
 
-This tool allows you to manage any ARK: Survival Evolved linux server without having to remember long commands.
-It provides a lot of features, to get the full list check the <<Usage>> section.
+Dieses Tool erlaubt es Dir jegliche ARK: Survival Evolved Linux Server zu verwalten ohne lange Befehle auswendig zu lernen.
+Es bietet eine Vielzahl an Funktionen, für die volle Liste schaue in der <<Benutzung>> Sektion nach.
 
 Installation
 ------------
 
-Prerequisites
+Vorraussetzungen für ARK Server Tools
 ~~~~~~~~~~~~~
 
-ARK Server Tools requires certain packages be installed in order to function correctly.
+ARK Server Tools benötigt bestimmte Packages um richtig funktionieren zu können.
 
-If running under CentOS or RHEL, you will need the following packages installed:
+Für CentOS oder RHEL musst Du die folgenden Packages installiert haben:
 ```
 perl-Compress-Zlib
 curl
@@ -21,8 +21,7 @@ libstdc++.i686
 bzip2
 ```
 
-If running under Debian or Ubuntu, you will need the following packages installed:
-
+Für Debian oder Ubuntu musst Du die folgenden Packages installiert haben:
 ```
 perl-modules
 curl
@@ -32,7 +31,7 @@ lib32gcc1
 bzip2
 ```
 
-Common prerequisites which should normally already be installed are:
+Normalerweise schon installierte Packages sind:
 ```
 >=bash-4.0
 >=coreutils-7.6
@@ -43,19 +42,19 @@ sed
 tar
 ```
 
-If using CentOS 6 or earlier, or Debian 7 or earlier, you will need to compile a newer version of glibc.
-See https://github.com/FezVrasta/ark-server-tools/wiki/Install-of-required-versions-of-glibc-and-gcc-on-RHEL-CentOS
+Für CentOS 6 oder früher, sowie Debian 7 oder früher musst Du eine neue Version von glibc kompilieren.
+Anleitung (Englisch): https://github.com/FezVrasta/ark-server-tools/wiki/Install-of-required-versions-of-glibc-and-gcc-on-RHEL-CentOS
 
-To use ARK Server Tools, you will need to install **SteamCMD** following this guide:
+Um ARK Server Tools nutzen zu können musst Du **SteamCMD** nach dieser Anleitung (Englisch) installieren:
 
 https://developer.valvesoftware.com/wiki/SteamCMD#Linux
 
-We assume you have created the `steam` user to store steamcmd and your ARK server.
+Wir nehmen an, dass Du den Benutzer `steam` angelegt hast um steamcmd und Deine ARK Server zu speichern.
 
-Requirements
+Vorraussetzungen für ARK Server
 ~~~~~~~~~~~~
 
-To allow your ARK server to communicate with the outside you have to open some ports in your firewall:
+Um Deinem ARK Server die Möglichkeit zu geben nach außen erreichbar zu sein musst Du ein paar Ports in der Firewall freigeben:
 
 ```sh
 iptables -I INPUT -p udp --dport 27016 -j ACCEPT
@@ -65,32 +64,34 @@ iptables -I INPUT -p tcp --dport 7778 -j ACCEPT
 iptables -I INPUT -p tcp --dport 32330 -j ACCEPT
 ```
 
-NB: Change the ports according to the ones set in your `arkmanager.cfg` file.
+Beachte: Ändere die Ports je nachdem welche Ports Du in der `arkmanager.cfg` Datei eingestellt hast.
 
-Install ARK Server Tools
+Installieren der ARK Server Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-To install ARK Server Tools run this command:
+Um ARK Server Tools zu installieren führe diesen Befehl aus:
 
 [source,sh]
-curl -sL http://git.io/vtf5N | sudo bash -s steam
+curl -sL https://raw.githubusercontent.com/Haeckerchen/ark-server-tools/master/netinstall.sh | sudo bash -s steam
 
-NB: You may want to change the `bash -s` parameter to fit your steam user if different from `steam`.
+Beachte: Du musst den `bash -s` Parameter ändern falls dein Steam-Benutzer anders ist als `steam`.
 
-This will copy the `arkmanager` script and its daemon to the proper directories and will create an empty log directory in `/var/log` for ARK Server Tools.
 
-To instead perform a user-install of ARK Server Tools as an unprivileged user, run this command:
+Das kopiert das `arkmanager` Script und seinen Daemon in die richtigen Verzeichnisse und erstellt einen leeren Log-Ordner in `/var/log` für ARK Server Tools.
+
+Falls Du lieber eine Benutzer-Installation der ARK Server Tools als unpriviligierten Benutzer haben möchtest, führe diesen Befehl aus:
 
 [source,sh]
-curl -sL http://git.io/vtf5N | bash -s -- --me
+curl -sL https://raw.githubusercontent.com/Haeckerchen/ark-server-tools/master/netinstall.sh | bash -s -- --me
 
-Configuration
+Konfiguration
 ~~~~~~~~~~~~~
 
-Stored in `/etc/arkmanager/arkmanager.cfg` and `/etc/arkmanager/instances/<instancename>.cfg` you can find the variables needed to start the server, like the port numbers, the system environment variables and so on.
+In `/etc/arkmanager/arkmanager.cfg` und `/etc/arkmanager/instances/<Instanzname>.cfg` gespeichert findest Du die Variablen die benötigt werden um den Server zu starten, wie Ports, System-Umgebungs-Variablen und so weiter.
 
 You will need to modify these files with any options you wish to give to the server, and any
 paths that are non-standard in your environment (e.g. one common one is the path to the appinfo cache).
+
 
 See <<Configuration files>> for options.
 
@@ -98,7 +99,7 @@ Also, in these files, you can specify any parameter you want to add to the start
 These parameters must be prefixed by the `ark_` string, some example could be:
 
 [source,sh]
-ark_SessionName="My ARK server"
+ark_SessionName="Mein ARK Server"
 ark_MaxPlayers=50
 ark_ServerPVE=False
 ark_DifficultyOffset=1
